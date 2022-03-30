@@ -30,16 +30,20 @@
     var typing = false;
     
     //add a chat cell to our chat list view, and scroll to the bottom
-    socket.on('addToChat',function(data){
+    socket.on('addToChat',function(data){ // this section is important because when its connected, socket receives an addToChat event. It takes the date, creates a new instance of a chatCell class, and add it to the chat scroll view.
               
       console.log('got a chat message');
       chatText.innerHTML += '<div class="chatCell">' + data + '</div>';
-      chatText.scrollTop = chatText.scrollHeight;
+      chatText.scrollTop = chatText.scrollHeight; // allows you to scroll
               
     });
     
 	
-    chatForm.onsubmit = function(e){
+    chatForm.onsubmit = function(e){ /* this part is important too because we first prevent the page from refreshing via form submission.
+            then we emit the event sendMsg with our chat inputs text value as an arugment. Our app.js file will then receive teh masse and sned
+            it to all connected sockets via the work we put in earlier. We also clear the form text so the user doesn't have to backspace to type a new message*/
+            // prevent teh form from refreshing the page
+
       //prevent the form from refreshing the page
 	e.preventDefault();
        
@@ -47,21 +51,26 @@
         socket.emit('sendMsgToServer', chatInput.value);
         chatInput.value = "";
 	}
+    // we are saying when someone is typing add focus to the form
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('chat-input').addEventListener('focus', function() {  
             typing = true;
         });
+        // when typing isn't being done no longer focus on the form
         document.getElementById('chat-input').addEventListener('blur', function() {
             typing = false;
         });
     });
+    // this checks for when the user hits the enter key.
     document.onkeyup = function(event){
         //user pressed and released enter key
         if(event.keyCode === 13){
+            //If typing is false, then we focus the chat input so they can begin typing without having to click on the field.
             if(!typing){
                 //user is not already typing, focus our chat text form
                 chatInput.focus();
             }
+            // if typing is true when the user hits enter, we know they just sent a message, so we blur the input form
             else {
                 //user sent a message, unfocus our chat form 
                 chatInput.blur();
